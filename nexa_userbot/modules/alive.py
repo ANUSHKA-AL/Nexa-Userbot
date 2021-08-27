@@ -77,8 +77,7 @@ async def pyroalive(_, message: Message):
     alive_msg = f"""
 **{custom_alive_msg}**
 
-
-┏━━━━━━━━━━━━━━━━━━━━    
+┏━━━━━нєγ! ι αм αℓινє━━━━━━    
 **┣Python-** `{python_version}`
 **┣Branch-** `main`
 **┣Pyrogram Version-** `{pyrogram_version}`
