@@ -7,7 +7,7 @@
 
 # Deploy
 ### With Heroku
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/xhrvan/Nexa-Userbot)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/ANUSHKA-AL/Nexa-Userbot)
 
 ### With VPS (Local)
 - Clone Nexa-Userbot repository
