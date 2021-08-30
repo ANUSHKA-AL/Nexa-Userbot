@@ -1,42 +1,79 @@
-# Copyright (c) 2021 xhrvan
-# Part of: Nexa-Userbot
-# Credits: Developers Userbot
 import os
+import asyncio
 from pyrogram.types import Message
+from pyrogram import filters
 
+from prettytable import PrettyTable
 from nexa_userbot import NEXAUB, HELP, CMD_HELP
+from utility import split_list
 from config import Config
 from nexa_userbot.helpers.pyrogram_help import get_arg
 from nexa_userbot.core.main_cmd import nexaub_on_cmd, e_or_r
 
 
-# Help
-HELP.update(
-    {
-        "**🧭 Userbot**": "`alive`, `installer`, `updater`",
-        "**👨‍💻 Dev**": "`eval`",
-        "**⚙️ Tools**": "`paste`, `short_url`, `search`, `pictools`, `extractor`, `megatools`",
-        "**🗂 Utils**": "`stickers`, `owner`, `sudos`, `afk`, `globals`",
-        "\n**Usage**": "`.help [module_name]`"
-    }
-)
+heading = "──「 **{0}** 」──\n"
 
-mod_file = os.path.basename(__file__)
 
-@nexaub_on_cmd(command="help", modlue=mod_file)
-async def help(_, message: Message):
-    args = get_arg(message)
-    help_user_msg = await e_or_r(nexaub_message=message, msg_text="`Processing...`")
-    if not args:
-        text = "**Available Commands**\n\n"
-        for key, value in HELP.items():
-            text += f"{key}: {value}\n\n"
-        await help_user_msg.edit(text)
-        return
-    else:
-        module_help = CMD_HELP.get(args, False)
-        if not module_help:
-            await help_user_msg.edit("`Invalid Module Name!`")
-            return
+@NEXAUB.on_message(filters.command("help", ".") & filters.me)
+async def module_help(_, message: Message):
+    cmd = message.command
+
+    help_arg = ""
+    if len(cmd) > 1:
+        help_arg = " ".join(cmd[1:])
+    elif message.reply_to_message and len(cmd) == 1:
+        help_arg = message.reply_to_message.text
+    elif not message.reply_to_message and len(cmd) == 1:
+        all_commands = ""
+        all_commands += "Please specify which module you want help for!! \nUsage: `.help [module_name]`\n\n"
+
+        ac = PrettyTable()
+        ac.header = False
+        ac.title = "UserBot Modules"
+        ac.align = "l"
+
+        for x in split_list(sorted(CMD_HELP.keys()), 2):
+            ac.add_row([x[0], x[1] if len(x) >= 2 else None])
+
+        await message.edit(f"```{str(ac)}```")
+
+    if help_arg:
+        if help_arg in CMD_HELP:
+            commands: dict = CMD_HELP[help_arg]
+            this_command = "**Help for**\n"
+            this_command += heading.format(str(help_arg)).upper()
+
+            for x in commands:
+                this_command += f"-> `{str(x)}`\n```{str(commands[x])}```\n"
+
+            await message.edit(this_command, parse_mode="markdown")
         else:
-            await help_user_msg.edit(module_help)
+            await message.edit(
+                "`Please specify a valid module name.`", parse_mode="markdown"
+            )
+
+    await asyncio.sleep(10)
+    await message.delete()
+
+
+def add_command_help(module_name, commands):
+    """
+    Adds a modules help information.
+    :param module_name: name of the module
+    :param commands: list of lists, with command and description each.
+    """
+
+    # Key will be group name
+    # values will be dict of dicts of key command and value description
+
+    if module_name in CMD_HELP.keys():
+        command_dict = CMD_HELP[module_name]
+    else:
+        command_dict = {}
+
+    for x in commands:
+        for y in x:
+            if y is not x:
+                command_dict[x[0]] = x[1]
+
+    CMD_HELP[module_name] = command_dict
